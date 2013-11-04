@@ -9,10 +9,15 @@ import re, itertools, sys, datetime
 from time import mktime
 
 
+# URL directes
 sources_feeds = [
-	'http://lbc2rss.superfetatoire.com/www.leboncoin.fr/ventes_immobilieres/offres/pays_de_la_loire/?f=a&th=1&ps=6&pe=11&sqs=11&location=Toutes%20les%20communes%2085600',
-	'http://lbc2rss.superfetatoire.com/www.leboncoin.fr/ventes_immobilieres/offres/pays_de_la_loire/?f=a&th=1&ps=6&pe=11&sqs=11&location=Toutes%20les%20communes%2049300'
 ]
+
+# Annonces immobilières par code postal
+codes_postaux = [ 49300, 49280, 49740, 85600, 85290, 85530, 85260, 49450, 49230, 49600, 44430, 44330, 44190 ]
+url_prefix = 'http://lbc2rss.superfetatoire.com/www.leboncoin.fr/ventes_immobilieres/offres/pays_de_la_loire/?f=a&th=1&ps=6&pe=11&sqs=11&location=Toutes%20les%20communes%20'
+sources_feeds.extend( [ "".join([ url_prefix, cp ]) for cp in codes_postaux ] )
+
 
 removeUnreachableContent = False	# delete items whose link is unreachable
 removeDuplicateItems = False        # if multiple items have an equivalent "description" field, keep only the most recent one
