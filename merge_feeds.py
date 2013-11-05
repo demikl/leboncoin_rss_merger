@@ -22,6 +22,7 @@ sources_feeds.extend( [ "".join([ url_prefix, str(cp) ]) for cp in codes_postaux
 removeUnreachableContent = False	# delete items whose link is unreachable
 removeDuplicateItems = False        # if multiple items have an equivalent "description" field, keep only the most recent one
 setGuidFromDescription = True		# change GUID for each item and set it according to the description field
+includePriceInTitle = True
 
 # Fetch source feeds
 pool = eventlet.GreenPool()
@@ -95,6 +96,15 @@ if removeUnreachableContent:
 	for item, status in pool.imap( check_status, merged_feed ):
 		if status == 200: purged_feed += [item]
 	merged_feed = purged_feed
+
+if includePriceInTitle:
+	""" u'<h2> Maison 7 pi\xe8ces 146 m\xb2  (182&nbsp;000\xa0\u20ac)</h2><img alt="" src="http://193.164.196.50/images/142/142305106026194.jpg" /><p> (pro) </p><h3><strong>Prix : </strong>182&nbsp;000\xa0\u20ac</h3><p><strong>O\xf9 ? : </strong> Cholet / Maine-et-Loire </p><p><strong>Mise en ligne de l\'annonce : </strong>05 Nov 2013 \xe0 11:02 </p>'"""
+	price_regex = re.compile(u"<h3><strong>Prix : </strong>(\d+)&nbsp;(\d+)\xa0\u20ac</h3>")
+	for item in merged_feed:
+		price = price_regex.search( item['description'] )
+		if price:
+			price = int(price.group(1)) * 1000 + int(price.group(2))
+			item['title'] += u" - %d\xa0\u20ac" % (price)
 
 # Sort by most recent first
 sorted_feed = sorted( merged_feed, key=lambda item: item['published_parsed'] )
